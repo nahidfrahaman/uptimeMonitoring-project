@@ -9,7 +9,6 @@ inspired by : sumit shaha
 const handler = {}
 
 handler.notFoundHandler = (requestProperty, callback) =>  {
-    console.log('Not Found');
     callback(404, {
         message : 'Your requested url not Found'
     })
