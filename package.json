@@ -5,6 +5,7 @@
     "prettier": "^3.3.2"
   },
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "SET NODE_ENV=staging & nodemon index.js",
+    "production": "SET NODE_ENV=production & nodemon index.js"
   }
 }

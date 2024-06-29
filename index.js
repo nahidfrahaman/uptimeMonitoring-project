@@ -8,24 +8,25 @@ inspired by : sumit shaha
 
 // dependencis 
 const http = require('http');
-
-
 const {handleReqRes} = require('./helpers/handleReqRes')
-
+const environment  = require('./helpers/environment')
+const data = require('./lib/data')
 
 // app object - module scaffolding 
 const app = {};
 
-//configaration 
-app.config = {
-    port : 3000
-}
+// for testing perpose 
+data.changeFileName('test','textnahid', 'originalText',  (err)=> {
+     if(err) {
+        console.log('error was : ' , err);
+     } 
+})
 
 // create Server 
 app.createServer  = () => {
     const server = http.createServer(app.handleRequest);
-    server.listen(app.config.port, () => {
-        console.log('listening port in ' + app.config.port);
+    server.listen(environment.port, () => {
+        console.log('listening port in' + environment.port);
         
     })
 }

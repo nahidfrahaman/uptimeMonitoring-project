@@ -21,7 +21,7 @@ handler.handleReqRes =  (req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const path = parsedUrl.pathname;
     const tirmedPath = path.replace(/^\/|\/+$/g,'')
-    console.log(tirmedPath);
+    
     
     // get method   // get method     // get header 
     const method = req.method.toLowerCase();
@@ -43,27 +43,27 @@ handler.handleReqRes =  (req, res) => {
     let realdata = "";
 
     const chosenHandler = routes[tirmedPath] ? routes[tirmedPath] : notFoundHandler;
-    console.log(chosenHandler);
     
-    chosenHandler(requestProperty, (statusCode, payload) => {
-        statusCode = typeof(statusCode) === 'number' ? statusCode : 500 ;
-        payload = typeof(payload) === 'object' ? payload : {} ;
-
-        const payloadSting = JSON.stringify(payload);
-
-        // return final response 
-        res.writeHead(statusCode);
-        res.end(payloadSting);
-    })
-
-
+    
     req.on('data', (buffer) => {
         realdata += decoder.write(buffer)
     })
 
     req.on('end', () => {
         realdata += decoder.end();
-        res.end('hello programer')
+
+        chosenHandler(requestProperty, (statusCode, payload) => {
+            statusCode = typeof(statusCode) === 'number' ? statusCode : 500 ;
+            payload = typeof(payload) === 'object' ? payload : {} ;
+    
+            const payloadSting = JSON.stringify(payload);
+    
+            // return final response 
+            res.writeHead(statusCode);
+            res.end(payloadSting);
+        })
+    
+       
     })
 
     // response handle 
