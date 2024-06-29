@@ -10,11 +10,17 @@ inspired by : sumit shaha
 const http = require('http');
 const {handleReqRes} = require('./helpers/handleReqRes')
 const environment  = require('./helpers/environment')
-
+const data = require('./lib/data')
 
 // app object - module scaffolding 
 const app = {};
 
+// for testing perpose 
+data.create('test','textnahid', {mygf: 'sanjida', loved : 'yes'} , (err)=> {
+     if(err) {
+        console.log('error was : ' , err);
+        
+}})
 
 // create Server 
 app.createServer  = () => {
