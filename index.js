@@ -16,11 +16,11 @@ const data = require('./lib/data')
 const app = {};
 
 // for testing perpose 
-data.changeFileName('test','textnahid', 'originalText',  (err)=> {
-     if(err) {
-        console.log('error was : ' , err);
-     } 
-})
+// data.changeFileName('test','textnahid', 'originalText',  (err)=> {
+//      if(err) {
+//         console.log('error was : ' , err);
+//      } 
+// })
 
 // create Server 
 app.createServer  = () => {
