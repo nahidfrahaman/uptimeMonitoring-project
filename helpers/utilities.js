@@ -26,15 +26,28 @@ utilities.parseJSON = (jsonStirng) => {
 
 utilities.hash =(str) => {
    if(typeof str === 'string' && str.length > 0 ) {
-      console.log(environments, process.env.NODE_ENV);
-      
       const hash = createHmac('sha256', environments.secretKey)
                .update(str)
                .digest('hex');
-      console.log(hash) ;
-      
       return hash ; 
    }
+}
+
+utilities.randomString = (stringLength) => {
+  
+   if(typeof stringLength === 'number' && stringLength >= 20) {
+      
+      
+      const randomString = 'abcdefghijklmnopqrstuvwxyz'
+      let output = '';
+      for(let i = 0 ; i < stringLength ; ++i) {
+         const genreatedRandomString = randomString.charAt(Math.random() * stringLength)
+         output += genreatedRandomString ;
+      }
+      return output ;
+   }
+  
+   
 }
 
 module.exports = utilities ;
