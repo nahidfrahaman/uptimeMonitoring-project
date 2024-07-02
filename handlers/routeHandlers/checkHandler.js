@@ -1,0 +1,171 @@
+/*
+title :check Handler 
+Description : handle routes to handlecheck routes
+Author : nahid 
+Date :02-07-24
+inspired by : sumit shaha
+*/
+// dependencies
+// const { hash, parseJSON ,randomString} = require('../../helpers/utilities');
+// const lib = require('../../lib/data');
+// const utilities = require('../../helpers/utilities');
+// const {hash} = require('../../helpers/utilities');
+// const {parseJSON} = require('../../helpers/utilities');
+
+const { parseJSON, randomString } = require("../../helpers/utilities");
+const lib = require("../../lib/data");
+const { _token } = require("./tokenHandler");
+
+
+
+// module scaffolding ;
+const handler = {}
+
+handler.checkHandler = (requestProperty, callback) =>  {
+    const acceptedMethod = ['get', 'post', 'put', 'delete',]
+
+    if(acceptedMethod.indexOf(requestProperty.method) > -1) {
+        // accepted method area 
+        handler._check[requestProperty.method](requestProperty, callback) ;
+    } else {
+        callback(405)
+    }   
+}
+
+handler._check = {}
+
+handler._check.post = (requestProperty, callback) => {
+    // checking inputs
+    const protocol = typeof requestProperty.body.protocol === 'string' && ['http','https'].indexOf(requestProperty.body.protocol) > -1 ? requestProperty.body.protocol : false ;
+
+    const url = typeof requestProperty.body.url === 'string' && requestProperty.body?.url.trim().length > 0 ? requestProperty.body.url : false ;
+
+    const method = typeof requestProperty.body.method === 'string' && ['get', 'post', 'put', 'delete'].indexOf(requestProperty.body.method) > -1 ? requestProperty.body.method : false ;
+
+    const successCode = typeof requestProperty.body.successCode === 'object' && Array.isArray(requestProperty.body.successCode) === true ? requestProperty.body.successCode : fasle ;
+
+    console.log(requestProperty.body.timeoutSeconds);
+    
+
+    const timeoutSeconds = typeof requestProperty.body.timeoutSeconds === 'number' && requestProperty.body.timeoutSeconds % 1 === 0 && requestProperty.body.timeoutSeconds >= 1 && requestProperty.body.timeoutSeconds <= 5 ? requestProperty.body.timeoutSeconds : false ;
+
+    if(protocol && url && method && successCode && timeoutSeconds ) {
+        const token = typeof requestProperty.headersObject.token === 'string' && requestProperty.headersObject.token.trim().length >=20 ? requestProperty.headersObject.token : false ;
+
+        if(token) {
+           // look up the user phone by reading token 
+            lib.read('tokens', token, (err, tokendata) => {
+                if(!err && tokendata) {
+                    const userPhone = parseJSON(tokendata).phone ;
+                    console.log(userPhone);
+
+                  // lookup the use 
+                  lib.read('user', userPhone, (err, userData) => {
+                    if(!err , userData) {
+                        const userObject = parseJSON(userData);
+                        // token verify
+                        _token.verify(token, userObject.phone , (tokeIsValid) => {
+                            if(tokeIsValid) {
+                             // check have check property into userobject  if not , assign empty array 
+                              const usercheck = typeof userObject.check === 'object' && Array.isArray(userObject.check) === true ? userObject.check : [] ; 
+
+                              if(usercheck.length < 5 ) {
+                                const checkId = randomString(20);
+                                const checkObj = {
+                                    id : checkId,
+                                    userPhone ,
+                                    protocol,
+                                    url ,
+                                    method,
+                                    successCode,
+                                    timeoutSeconds
+                                }
+                                // save the obj data file ,
+                                lib.create('checks', checkId, checkObj,(err) => {
+                                    if(!err) {
+                                        // add check id into user object 
+                                        userObject.check = usercheck ;
+                                        userObject.check.push(checkId)
+
+                                        // save or update user data ,
+
+                                        lib.update('user',userPhone, userObject,(err) => {
+                                            if(!err) {
+                                                callback(200, {
+                                                    userObject 
+                                                })
+                                            } else {
+                                                callback(401, {
+                                                    errorMessage: 'there is error in server side ',
+                                                });
+                                            }
+                                        })
+                                    } else {
+                                        callback(500, {
+                                            errorMessage: 'server error !',
+                                        });
+                                    }
+                                })
+                                
+
+                              } else {
+                                callback(401, {
+                                    errorMessage: 'Userhas already reached max check limit!',
+                                });
+                              }
+
+
+                            } else {
+                                callback(403, {
+                                    errorMessage: 'token is invalid!',
+                                });
+                            }
+                        })
+                    } else {
+                        callback(403, {
+                            errorMessage: 'user not found!',
+                        });
+                    }
+                  })
+                    
+                } else {
+                    callback(403, {
+                        errorMessage: 'Authentication problem!',
+                    }); 
+                }
+            })
+        } else {
+            callback(404, {
+                errorMessage : "token is not given "
+            })
+        }
+
+
+
+
+    } else {
+        callback(404, {
+            errorMessage : "You have problem in your request"
+        })
+    }
+
+    
+
+} 
+
+handler._check.get = (requestProperty, callback) => {
+    
+    
+}
+
+handler._check.put = (requestProperty, callback) => {
+    
+}
+
+
+handler._check.delete = (requestProperty, callback) => {
+    
+} 
+
+
+module.exports = handler;

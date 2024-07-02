@@ -193,7 +193,6 @@ handler._user.put = (requestProperty, callback) => {
 }
 
 
-//@todo authentication
 
 handler._user.delete = (requestProperty, callback) => {
     const phone = typeof requestProperty.queryObject.phone === 'string' && requestProperty.queryObject.phone.length === 11 ? requestProperty.queryObject.phone : false ;
