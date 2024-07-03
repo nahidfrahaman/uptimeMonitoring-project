@@ -193,7 +193,105 @@ handler._check.get = (requestProperty, callback) => {
 }
 
 handler._check.put = (requestProperty, callback) => {
-    
+    const id = typeof requestProperty.body.id === 'string' && requestProperty.body.id.trim().length === 20 ? requestProperty.body.id : false ; 
+
+    const protocol = typeof requestProperty.body.protocol === 'string' && ['http','https'].indexOf(requestProperty.body.protocol) > -1 ? requestProperty.body.protocol : false ;
+
+    const url = typeof requestProperty.body.url === 'string' && requestProperty.body?.url.trim().length > 0 ? requestProperty.body.url : false ;
+
+    const method = typeof requestProperty.body.method === 'string' && ['get', 'post', 'put', 'delete'].indexOf(requestProperty.body.method) > -1 ? requestProperty.body.method : false ;
+
+    const successCode = typeof requestProperty.body.successCode === 'object' && Array.isArray(requestProperty.body.successCode) === true ? requestProperty.body.successCode : false ;
+
+    const timeoutSeconds = typeof requestProperty.body.timeoutSeconds === 'number' && requestProperty.body.timeoutSeconds % 1 === 0 && requestProperty.body.timeoutSeconds >= 1 && requestProperty.body.timeoutSeconds <= 5 ? requestProperty.body.timeoutSeconds : false ;
+
+    if(id) {
+        const token = typeof requestProperty.headersObject.token === 'string' && requestProperty.headersObject.token.trim().length >=20 ? requestProperty.headersObject.token : false ;
+
+      if(protocol || url || method || successCode || timeoutSeconds ) {
+        if(token) { 
+            // lock up the token for getting phone number 
+            lib.read('tokens', token , (err, tokenData) => {
+                if(!err && tokenData) {
+                    const { phone }= parseJSON(tokenData);
+                    // lock up the user 
+                    lib.read('user', phone, (err , userData) => {
+                        const userObj = parseJSON(userData);
+                        if(!err && userData) {
+                            // verify token 
+                            _token.verify(token, userObj.phone, (tokenIsValid) => {
+                                if(tokenIsValid){
+                                    // check have check property into userobject  if not , assign empty array 
+                                lib.read('checks', id , (err ,  checksData) => {
+                                    const checksObj = parseJSON(checksData) ;
+                                    if(!err && checksObj) {
+                                        if(protocol) {
+                                            checksObj.protocol = protocol ;
+                                        }
+                                        if(url) {
+                                            checksObj.url = url ;
+                                        }
+                                        if(method) {
+                                            checksObj.method = method ;
+                                        }
+                                        if(timeoutSeconds) {
+                                            checksObj.timeoutSeconds = timeoutSeconds ;
+                                        }
+
+                                        // update checks data 
+                                        lib.update('checks', checksObj.id , checksObj , (err) => {
+                                            if(!err) {
+                                                callback(200, {
+                                                    message : 'update successfuly'
+                                                })
+                                            } else {
+                                                callback(500, {
+                                                    errorMessage : "Server Side problem not updated "
+                                                })
+                                            }
+                                        })
+                                    } else {
+                                        callback(500, {
+                                            errorMessage : "Server Side problem checks data not found"
+                                        })
+                                    }
+                                })
+                               
+                               
+                                 
+                                } else {
+                                    callback(403, {
+                                        errorMessage : "Authentication problem"
+                                    })
+                                }
+                            })
+                        } else {
+                            callback(500, {
+                                errorMessage : "Server Side problem user not found "
+                            })    
+                        }
+                    })
+                } else {
+                    callback(500, {
+                        errorMessage : "Server Side problem token not found"
+                    })
+                }
+            })
+        } else {
+            callback(403, {
+                errorMessage : "You have problem in your request token is not given"
+            })
+        }
+    } else {
+        callback(404, {
+            errorMessage : "You have problem in your request"
+        })
+    }
+      } else {
+        callback(404, {
+            errorMessage : "You have problem in your request id not given"
+        })
+      }
 }
 
 
