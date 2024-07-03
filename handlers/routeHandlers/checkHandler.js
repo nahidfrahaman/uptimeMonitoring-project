@@ -296,7 +296,79 @@ handler._check.put = (requestProperty, callback) => {
 
 
 handler._check.delete = (requestProperty, callback) => {
-    
+    const id = typeof requestProperty.queryObject.id === 'string' && requestProperty.queryObject.id.length === 20 ? requestProperty.queryObject.id : false ;
+
+    if(id) {
+      const token = typeof requestProperty.headersObject.token === 'string' && requestProperty.headersObject.token.trim().length >=20 ? requestProperty.headersObject.token : false ;
+        if(token) {
+            // lock up the check 
+            lib.read('checks', id, (err, ckData) => {
+                const checksData = parseJSON(ckData)
+                if(!err && checksData) {
+                    // verify token 
+                    _token.verify(token, checksData.userPhone, (tokenIsValid) => {
+                        if(tokenIsValid) {
+                            // delete checks file 
+                            lib.delete('checks', id , (err) => {
+                                if(!err) { lib.read('user', checksData.userPhone, (err , userData) => {
+                                    const userObj = parseJSON(userData)
+                                        if(!err && userObj) {
+                                            const usercheck = typeof userObj.check === 'object' && Array.isArray(userObj.check) === true ? userObj.check : [] ; 
+
+                                            const checkPosition = userObj.check.indexOf(id)
+                                            if(checkPosition > -1) {
+                                                usercheck.splice(checkPosition, 1)
+
+                                                // updat the user 
+                                                lib.update('user', userObj.phone , userObj, (err)=> {
+                                                    if(!err) {
+                                                        callback(200, {
+                                                          message : 'deleted successfuly'
+                                                        })
+                                                    } else {
+                                                        callback(500, {
+                                                            errorMessage : "server error user not updated "
+                                                        })
+                                                    }
+                                                })
+                                            } else {
+                                                callback(500, {
+                                                    errorMessage : "check not found in user "
+                                                })
+                                            }
+                                        } else {
+                                            callback(500, {
+                                                errorMessage : "Server Side problem "
+                                            })
+                                        }
+                                    })
+                                } else {
+                                    
+                                }
+                            })
+
+                        } else {
+                            callback(404, {
+                                errorMessage : "Invalid Token"
+                            })
+                        }
+                    } )
+                } else {
+                    callback(500, {
+                        errorMessage : "Server Side problem"
+                    })
+                }
+            })
+        } else {
+            callback(404, {
+                errorMessage : "Token is not found "
+            })
+        }
+    } else {
+        callback(404, {
+            errorMessage : "You have problem in your request"
+        })
+    }
 } 
 
 
