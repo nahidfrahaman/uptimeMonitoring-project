@@ -154,7 +154,41 @@ handler._check.post = (requestProperty, callback) => {
 } 
 
 handler._check.get = (requestProperty, callback) => {
-    
+    const id = typeof requestProperty.queryObject.id === 'string' && requestProperty.queryObject.id.length === 20 ? requestProperty.queryObject.id : false ;
+
+    if(id) {
+      const token = typeof requestProperty.headersObject.token === 'string' && requestProperty.headersObject.token.trim().length >=20 ? requestProperty.headersObject.token : false ;
+        if(token) {
+            // lock up the check 
+            lib.read('checks', id, (err, ckData) => {
+                const checksData = parseJSON(ckData)
+                if(!err && checksData) {
+                    // verify token 
+                    _token.verify(token, checksData.userPhone, (tokenIsValid) => {
+                        if(tokenIsValid) {
+                            callback(200, checksData)
+                        } else {
+                            callback(404, {
+                                errorMessage : "Invalid Token"
+                            })
+                        }
+                    } )
+                } else {
+                    callback(500, {
+                        errorMessage : "Server Side problem"
+                    })
+                }
+            })
+        } else {
+            callback(404, {
+                errorMessage : "Token is not found "
+            })
+        }
+    } else {
+        callback(404, {
+            errorMessage : "You have problem in your request"
+        })
+    }
     
 }
 
