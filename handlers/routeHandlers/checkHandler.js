@@ -44,7 +44,7 @@ handler._check.post = (requestProperty, callback) => {
 
     const successCode = typeof requestProperty.body.successCode === 'object' && Array.isArray(requestProperty.body.successCode) === true ? requestProperty.body.successCode : fasle ;
 
-    console.log(requestProperty.body.timeoutSeconds);
+    
     
 
     const timeoutSeconds = typeof requestProperty.body.timeoutSeconds === 'number' && requestProperty.body.timeoutSeconds % 1 === 0 && requestProperty.body.timeoutSeconds >= 1 && requestProperty.body.timeoutSeconds <= 5 ? requestProperty.body.timeoutSeconds : false ;
@@ -57,7 +57,7 @@ handler._check.post = (requestProperty, callback) => {
             lib.read('tokens', token, (err, tokendata) => {
                 if(!err && tokendata) {
                     const userPhone = parseJSON(tokendata).phone ;
-                    console.log(userPhone);
+                   
 
                   // lookup the use 
                   lib.read('user', userPhone, (err, userData) => {

@@ -18,7 +18,7 @@ const {_token} = require('./tokenHandler')
 const handler = {}
 
 handler.userHandler = (requestProperty, callback) =>  {
-    const acceptedMethod = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+    const acceptedMethod = ['get', 'post', 'put', 'delete', 'patch']
 
     if(acceptedMethod.indexOf(requestProperty.method) > -1) {
         // accepted method area 
@@ -86,7 +86,7 @@ handler._user.get = (requestProperty, callback) => {
         // Authentication
          _token.verify(requestProperty.headersObject.token , phone, (token) => {
             if(token){
-                console.log(token); 
+               
                 lib.read('user', phone , (err, u)=> {
                     const user = {...parseJSON(u)}
                     delete user.password
@@ -133,7 +133,7 @@ handler._user.put = (requestProperty, callback) => {
         // Athentication
        _token.verify(requestProperty.headersObject?.token , phone , (token) =>{
         if(token) {
-            console.log(token);
+            
             
             if(firstName || lastName || password) {
 
