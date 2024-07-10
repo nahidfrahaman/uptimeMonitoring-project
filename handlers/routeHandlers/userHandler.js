@@ -18,7 +18,7 @@ const {_token} = require('./tokenHandler')
 const handler = {}
 
 handler.userHandler = (requestProperty, callback) =>  {
-    const acceptedMethod = ['get', 'post', 'put', 'delete', 'patch']
+    const acceptedMethod = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
 
     if(acceptedMethod.indexOf(requestProperty.method) > -1) {
         // accepted method area 

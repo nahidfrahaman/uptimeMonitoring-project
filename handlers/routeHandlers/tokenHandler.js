@@ -18,7 +18,7 @@ const lib = require('../../lib/data');
 const handler = {}
 
 handler.tokenHandler = (requestProperty, callback) =>  {
-    const acceptedMethod = ['get', 'post', 'put', 'delete',]
+    const acceptedMethod = ['GET', 'POST', 'PUT', 'DELETE',]
 
     if(acceptedMethod.indexOf(requestProperty.method) > -1) {
         // accepted method area 

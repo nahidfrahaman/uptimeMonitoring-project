@@ -1,38 +1,28 @@
 /*
-title : Uptime Monitoring Application 
-Description : A restful API to monitor up or down user define links
+title : project initial file 
+Description : Handle start the server and worker 
 Author : nahid 
 Date : 26-06-24
 inspired by : sumit shaha
 */
 
 // dependencis 
-const http = require('http');
-const {handleReqRes} = require('./helpers/handleReqRes')
-const environment  = require('./helpers/environment')
-const data = require('./lib/data')
+const server = require('./lib/server')
+const workers = require('./lib/worker')
 
 // app object - module scaffolding 
 const app = {};
 
-// for testing perpose 
-// data.changeFileName('test','textnahid', 'originalText',  (err)=> {
-//      if(err) {
-//         console.log('error was : ' , err);
-//      } 
-// })
 
-// create Server 
-app.createServer  = () => {
-    const server = http.createServer(app.handleRequest);
-    server.listen(environment.port, () => {
-        console.log('listening port in' + environment.port);
-        
-    })
+app.init = () => {
+    // start the server 
+    server.init();
+
+    // start the workers
+    workers.init() ;
 }
 
-// handle req res
-app.handleRequest = handleReqRes
+app.init()
 
-// run the server function 
-app.createServer();
+// module export 
+module.exports = app ;
